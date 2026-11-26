@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Reporte Técnico T1_U3 - GastOS</title>
+<style>
+  @page {
+    size: A4;
+    margin: 18mm 16mm 18mm 16mm;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #1e293b;
+    line-height: 1.5;
+    font-size: 10.5pt;
+    margin: 0;
+  }
+  .cover {
+    background: linear-gradient(135deg, #0f766e 0%, #042f2e 100%);
+    color: #ffffff;
+    padding: 28px 30px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+  }
+  .cover h1 { margin: 0 0 6px 0; font-size: 22pt; letter-spacing: -0.5px; }
+  .cover p { margin: 4px 0; opacity: 0.92; font-size: 10.5pt; }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 14px;
+    background: rgba(255,255,255,0.12);
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 9.5pt;
+  }
+  h2 {
+    color: #0f766e;
+    border-bottom: 2px solid #99f6e4;
+    padding-bottom: 4px;
+    margin-top: 22px;
+    margin-bottom: 10px;
+    font-size: 13.5pt;
+    page-break-after: avoid;
+  }
+  h3 {
+    color: #0f172a;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    font-size: 11pt;
+    page-break-after: avoid;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 14px 0;
+    font-size: 9.5pt;
+  }
+  th, td {
+    border: 1px solid #cbd5e1;
+    padding: 7px 9px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #f0fdfa;
+    color: #0f766e;
+    font-weight: 700;
+  }
+  code {
+    background: #f1f5f9;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: Consolas, monospace;
+    font-size: 9pt;
+    color: #0f172a;
+  }
+  .diagram-box {
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 12px;
+    background: #ffffff;
+    margin: 12px 0;
+    page-break-inside: avoid;
+  }
+  .diagram-caption {
+    text-align: center;
+    font-size: 9pt;
+    color: #475569;
+    margin-top: 6px;
+    font-style: italic;
+  }
+  .callout {
+    background: #f0fdfa;
+    border-left: 4px solid #0f766e;
+    padding: 10px 14px;
+    border-radius: 0 8px 8px 0;
+    margin: 10px 0;
+    page-break-inside: avoid;
+  }
+  ul { margin: 6px 0 10px 18px; padding: 0; }
+  li { margin-bottom: 4px; }
+  .page-break { page-break-before: always; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <h1>Reporte Técnico — GastOS (MVP)</h1>
+  <p>Aplicación Móvil de Gestión de Gastos Personales • Actividad T1_U3</p>
+  <div class="meta-grid">
+    <div><strong>Autor / GitHub:</strong><br>raulito789</div>
+    <div><strong>Stack Móvil:</strong><br>Android Nativo (Kotlin + Compose)</div>
+    <div><strong>Fecha:</strong><br>25 de noviembre de 2026</div>
+  </div>
+</div>
+
+<h2>1. Resumen Ejecutivo y Stack Tecnológico</h2>
+<p>
+  <strong>GastOS</strong> es una aplicación móvil Android desarrollada bajo arquitectura por capas (UI declarativa con Jetpack Compose Material 3, capa de repositorio, persistencia local cifrada con Room + SQLCipher y consumo de servicios Web REST para autenticación y sincronización con Supabase).
+</p>
+<table>
+  <thead>
+    <tr>
+      <th>Requisito Técnico</th>
+      <th>Implementación en GastOS</th>
+      <th>Archivos Clave</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Persistencia local &amp; CRUD</td>
+      <td>Room 2.7.2 + SQLite cifrado con SQLCipher 4.6.1, 3 entidades relacionadas con llaves foráneas.</td>
+      <td><code>AppDatabase.kt</code>, <code>GastoDao.kt</code>, <code>PresupuestoDao.kt</code>, <code>CategoriaDao.kt</code></td>
+    </tr>
+    <tr>
+      <td>Servicios Web &amp; Auth</td>
+      <td>Supabase Auth (<code>signup</code>, <code>token</code>, <code>logout</code>) y PostgREST con Retrofit 2.11.0 + OkHttp 4.12.0 + estados <code>Loading/Success/Error</code>.</td>
+      <td><code>SupabaseApi.kt</code>, <code>NetworkModule.kt</code>, <code>AuthRepository.kt</code></td>
+    </tr>
+    <tr>
+      <td>Sensores &amp; Multimedia</td>
+      <td>Captura de fotos de tickets con cámara (<code>TakePicture</code> + <code>FileProvider</code> + Coil) y autenticación biométrica (<code>BiometricPrompt</code>).</td>
+      <td><code>ExpenseFormDialog.kt</code>, <code>BiometricAuthHelper.kt</code></td>
+    </tr>
+    <tr>
+      <td>Notificaciones Locales</td>
+      <td><code>NotificationCompat</code> + <code>WorkManager</code> al superar &ge; 80% del presupuesto semanal/mensual.</td>
+      <td><code>BudgetNotifier.kt</code>, <code>BudgetCheckWorker.kt</code></td>
+    </tr>
+    <tr>
+      <td>Seguridad</td>
+      <td>Android KeyStore AES-256-GCM, SQLCipher AES-256, <code>InputValidator</code> y redacción de cabeceras JWT.</td>
+      <td><code>CryptoManager.kt</code>, <code>SecureTokenStorage.kt</code>, <code>InputValidator.kt</code></td>
+    </tr>
+    <tr>
+      <td>Librerías de Terceros</td>
+      <td>Vico Charts (<code>compose-m3</code>), Coil (<code>coil-compose</code>), Retrofit/OkHttp y SQLCipher.</td>
+      <td><code>DashboardScreen.kt</code>, <code>ExpensesScreen.kt</code>, <code>gradle/libs.versions.toml</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>2. Diagrama de Clases (UML Simplificado)</h2>
+<div class="diagram-box">
+  <svg viewBox="0 0 760 410" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif">
+    <defs>
+      <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 Z" fill="#0f766e"/>
+      </marker>
+    </defs>
+
+    <!-- MainViewModel -->
+    <rect x="255" y="10" width="250" height="105" rx="6" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.8"/>
+    <rect x="255" y="10" width="250" height="26" rx="6" fill="#0f766e"/>
+    <text x="380" y="28" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">MainViewModel</text>
+    <text x="265" y="52" font-size="10" fill="#0f172a">+ authState: StateFlow&lt;AuthState&gt;</text>
+    <text x="265" y="67" font-size="10" fill="#0f172a">+ gastos, presupuestos, metrics: StateFlow</text>
+    <text x="265" y="82" font-size="10" fill="#0f172a">+ saveGasto(), deleteGasto(), syncCloud()</text>
+    <text x="265" y="97" font-size="10" fill="#0f172a">+ signIn(), signUp(), savePresupuesto()</text>
+
+    <!-- AuthRepository -->
+    <rect x="25" y="155" width="215" height="95" rx="6" fill="#fff" stroke="#0284c7" stroke-width="1.6"/>
+    <rect x="25" y="155" width="215" height="24" rx="6" fill="#0284c7"/>
+    <text x="132" y="172" text-anchor="middle" fill="#fff" font-size="11.5" font-weight="bold">AuthRepository</text>
+    <text x="35" y="195" font-size="10" fill="#0f172a">- networkModule: NetworkModule</text>
+    <text x="35" y="210" font-size="10" fill="#0f172a">- tokenStorage: SecureTokenStorage</text>
+    <text x="35" y="225" font-size="10" fill="#0f172a">+ signIn(), signUp(), signOut()</text>
+    <text x="35" y="240" font-size="10" fill="#0f172a">+ unlockWithBiometricSession()</text>
+
+    <!-- ExpenseRepository -->
+    <rect x="275" y="155" width="225" height="105" rx="6" fill="#fff" stroke="#0f766e" stroke-width="1.6"/>
+    <rect x="275" y="155" width="225" height="24" rx="6" fill="#0f766e"/>
+    <text x="387" y="172" text-anchor="middle" fill="#fff" font-size="11.5" font-weight="bold">ExpenseRepository</text>
+    <text x="285" y="195" font-size="10" fill="#0f172a">- database: AppDatabase</text>
+    <text x="285" y="210" font-size="10" fill="#0f172a">- crypto: TextCipher</text>
+    <text x="285" y="225" font-size="10" fill="#0f172a">- notifier: BudgetNotifier</text>
+    <text x="285" y="240" font-size="10" fill="#0f172a">+ createOrUpdateGasto(), syncWithCloud()</text>
+    <text x="285" y="254" font-size="10" fill="#0f172a">+ evaluateBudgetsAndNotify()</text>
+
+    <!-- CryptoManager & InputValidator -->
+    <rect x="530" y="155" width="205" height="95" rx="6" fill="#fff" stroke="#d97706" stroke-width="1.6"/>
+    <rect x="530" y="155" width="205" height="24" rx="6" fill="#d97706"/>
+    <text x="632" y="172" text-anchor="middle" fill="#fff" font-size="11.5" font-weight="bold">Security Layer</text>
+    <text x="540" y="195" font-size="10" fill="#0f172a">CryptoManager (AES-256-GCM)</text>
+    <text x="540" y="210" font-size="10" fill="#0f172a">SecureTokenStorage (Encrypted Prefs)</text>
+    <text x="540" y="225" font-size="10" fill="#0f172a">InputValidator (Regex + Anti-XSS/SQLi)</text>
+    <text x="540" y="240" font-size="10" fill="#0f172a">BiometricAuthHelper (BiometricPrompt)</text>
+
+    <!-- AppDatabase -->
+    <rect x="275" y="295" width="225" height="98" rx="6" fill="#fff" stroke="#334155" stroke-width="1.6"/>
+    <rect x="275" y="295" width="225" height="24" rx="6" fill="#334155"/>
+    <text x="387" y="312" text-anchor="middle" fill="#fff" font-size="11.5" font-weight="bold">AppDatabase (Room + SQLCipher)</text>
+    <text x="285" y="334" font-size="10" fill="#0f172a">+ gastoDao(): GastoDao</text>
+    <text x="285" y="349" font-size="10" fill="#0f172a">+ categoriaDao(): CategoriaDao</text>
+    <text x="285" y="364" font-size="10" fill="#0f172a">+ presupuestoDao(): PresupuestoDao</text>
+    <text x="285" y="379" font-size="10" fill="#0f172a">+ create(passphrase: ByteArray)</text>
+
+    <!-- NetworkModule -->
+    <rect x="25" y="295" width="215" height="98" rx="6" fill="#fff" stroke="#0284c7" stroke-width="1.6"/>
+    <rect x="25" y="295" width="215" height="24" rx="6" fill="#0284c7"/>
+    <text x="132" y="312" text-anchor="middle" fill="#fff" font-size="11.5" font-weight="bold">NetworkModule (Retrofit)</text>
+    <text x="35" y="334" font-size="10" fill="#0f172a">+ authApi(): SupabaseAuthApi</text>
+    <text x="35" y="349" font-size="10" fill="#0f172a">+ restApi(): SupabaseRestApi</text>
+    <text x="35" y="364" font-size="10" fill="#0f172a">- redactHeader("Authorization")</text>
+    <text x="35" y="379" font-size="10" fill="#0f172a">- demoFallbackInterceptor</text>
+
+    <!-- BudgetNotifier / Worker -->
+    <rect x="530" y="295" width="205" height="98" rx="6" fill="#fff" stroke="#7c3aed" stroke-width="1.6"/>
+    <rect x="530" y="295" width="205" height="24" rx="6" fill="#7c3aed"/>
+    <text x="632" y="312" text-anchor="middle" fill="#fff" font-size="11.5" font-weight="bold">Notificaciones (WorkManager)</text>
+    <text x="540" y="334" font-size="10" fill="#0f172a">BudgetNotifier.notifyBudgetExceeded()</text>
+    <text x="540" y="349" font-size="10" fill="#0f172a">BudgetCheckWorker (cada 12h)</text>
+    <text x="540" y="364" font-size="10" fill="#0f172a">Canal: budget_alerts_channel</text>
+
+    <!-- Arrows -->
+    <line x1="310" y1="115" x2="155" y2="153" stroke="#0f766e" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <line x1="380" y1="115" x2="387" y2="153" stroke="#0f766e" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <line x1="450" y1="115" x2="600" y2="153" stroke="#0f766e" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <line x1="132" y1="250" x2="132" y2="293" stroke="#0f766e" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <line x1="387" y1="260" x2="387" y2="293" stroke="#0f766e" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <line x1="500" y1="215" x2="528" y2="215" stroke="#0f766e" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <line x1="470" y1="260" x2="565" y2="293" stroke="#0f766e" stroke-width="1.5" marker-end="url(#arrow)"/>
+  </svg>
+  <div class="diagram-caption">Figura 1. Diagrama de clases y arquitectura por capas MVVM + Repositorio en GastOS.</div>
+</div>
+
+<div class="page-break"></div>
+
+<h2>3. Modelo de Datos Relacional (Entidad-Relación)</h2>
+<p>
+  La base de datos local <code>gastos_seguros.db</code> implementa tres entidades principales relacionadas mediante integridad referencial en SQLite (Room) y cifrado completo de página mediante <strong>SQLCipher</strong>:
+</p>
+<div class="diagram-box">
+  <svg viewBox="0 0 760 270" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif">
+    <!-- CategoriaEntity -->
+    <rect x="275" y="12" width="210" height="115" rx="6" fill="#fff" stroke="#0f766e" stroke-width="1.8"/>
+    <rect x="275" y="12" width="210" height="24" rx="6" fill="#0f766e"/>
+    <text x="380" y="29" text-anchor="middle" fill="#fff" font-size="11.5" font-weight="bold">categorias (CategoriaEntity)</text>
+    <text x="285" y="52" font-size="10" font-weight="bold" fill="#0f172a">PK  id: Long</text>
+    <text x="285" y="68" font-size="10" fill="#0f172a">    nombre: String</text>
+    <text x="285" y="84" font-size="10" fill="#0f172a">    icono: String</text>
+    <text x="285" y="100" font-size="10" fill="#0f172a">    colorHex: Long</text>
+    <text x="285" y="116" font-size="10" fill="#0f172a">    esSistema: Boolean</text>
+
+    <!-- GastoEntity -->
+    <rect x="20" y="95" width="225" height="165" rx="6" fill="#fff" stroke="#2563eb" stroke-width="1.8"/>
+    <rect x="20" y="95" width="225" height="24" rx="6" fill="#2563eb"/>
+    <text x="132" y="112" text-anchor="middle" fill="#fff" font-size="11.5" font-weight="bold">gastos (GastoEntity)</text>
+    <text x="30" y="135" font-size="10" font-weight="bold" fill="#0f172a">PK  id: Long</text>
+    <text x="30" y="150" font-size="10" font-weight="bold" fill="#2563eb">FK  categoriaId: Long (RESTRICT)</text>
+    <text x="30" y="165" font-size="10" fill="#0f172a">    titulo: String</text>
+    <text x="30" y="180" font-size="10" fill="#0f172a">    monto: Double</text>
+    <text x="30" y="195" font-size="10" fill="#0f172a">    fechaEpochMillis: Long</text>
+    <text x="30" y="210" font-size="10" fill="#b45309">    notaCifrada: String (AES-GCM)</text>
+    <text x="30" y="225" font-size="10" fill="#0f172a">    rutaTicket: String?</text>
+    <text x="30" y="240" font-size="10" fill="#0f172a">    sincronizado: Boolean, remoteId</text>
+    <text x="30" y="253" font-size="10" fill="#0f172a">    usuarioId: String, updatedAt</text>
+
+    <!-- PresupuestoEntity -->
+    <rect x="515" y="105" width="225" height="135" rx="6" fill="#fff" stroke="#d97706" stroke-width="1.8"/>
+    <rect x="515" y="105" width="225" height="24" rx="6" fill="#d97706"/>
+    <text x="627" y="122" text-anchor="middle" fill="#fff" font-size="11.5" font-weight="bold">presupuestos (PresupuestoEntity)</text>
+    <text x="525" y="145" font-size="10" font-weight="bold" fill="#0f172a">PK  id: Long</text>
+    <text x="525" y="161" font-size="10" font-weight="bold" fill="#d97706">FK  categoriaId: Long (CASCADE, UNIQUE)</text>
+    <text x="525" y="177" font-size="10" fill="#0f172a">    montoLimite: Double</text>
+    <text x="525" y="193" font-size="10" fill="#0f172a">    periodo: String (SEMANAL/MENSUAL)</text>
+    <text x="525" y="209" font-size="10" fill="#0f172a">    alertaPorcentaje: Int (default 80)</text>
+    <text x="525" y="225" font-size="10" fill="#0f172a">    activo: Boolean</text>
+
+    <!-- Relation lines -->
+    <path d="M 275 75 L 132 75 L 132 95" fill="none" stroke="#2563eb" stroke-width="1.8"/>
+    <text x="190" y="68" font-size="10" font-weight="bold" fill="#2563eb">1 : N</text>
+
+    <path d="M 485 75 L 627 75 L 627 105" fill="none" stroke="#d97706" stroke-width="1.8"/>
+    <text x="545" y="68" font-size="10" font-weight="bold" fill="#d97706">1 : 1</text>
+  </svg>
+  <div class="diagram-caption">Figura 2. Modelo Entidad-Relación de Room con claves foráneas e índices en SQLite/SQLCipher.</div>
+</div>
+
+<h2>4. Mecanismos de Seguridad Implementados</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Capa de Seguridad</th>
+      <th>Mecanismo Técnico</th>
+      <th>Propósito</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Cifrado de Base de Datos</strong></td>
+      <td><code>SQLCipher 4.6.1</code> mediante <code>SupportOpenHelperFactory</code> con clave aleatoria de 32 bytes.</td>
+      <td>Protege el archivo completo <code>gastos_seguros.db</code> en almacenamiento interno frente a extracción física o root.</td>
+    </tr>
+    <tr>
+      <td><strong>Gestión de Llaves (Hardware)</strong></td>
+      <td><code>AndroidKeyStore</code> con algoritmo <code>AES/GCM/NoPadding</code> (256 bits) e IV aleatorio por cifrado (<code>CryptoManager</code>).</td>
+      <td>La clave maestra nunca abandona el entorno seguro del sistema operativo; cifra notas privadas, tokens y la passphrase de SQLCipher.</td>
+    </tr>
+    <tr>
+      <td><strong>Manejo Seguro de Tokens</strong></td>
+      <td><code>SecureTokenStorage</code> cifra <code>accessToken</code> y <code>refreshToken</code>, valida expiración (<code>expiresAtEpochSec</code>), y <code>OkHttp</code> aplica <code>redactHeader("Authorization")</code> y <code>redactHeader("apikey")</code>.</td>
+      <td>Evita exposición de JWT en preferencias en texto plano o en registros Logcat durante depuración.</td>
+    </tr>
+    <tr>
+      <td><strong>Validación y Saneamiento</strong></td>
+      <td><code>InputValidator</code> valida correos RFC, contraseñas robustas (&ge;8 chars, mayúscula, minúscula y dígito), montos (0.01–999,999.99) y bloquea patrones <code>&lt;script</code>, <code>javascript:</code> y <code>DROP TABLE</code>.</td>
+      <td>Mitiga errores de captura, desbordamientos numéricos e inyecciones de código en formularios.</td>
+    </tr>
+    <tr>
+      <td><strong>Biometría y Backup</strong></td>
+      <td><code>BiometricPrompt</code> (<code>BIOMETRIC_STRONG | WEAK | DEVICE_CREDENTIAL</code>) y <code>android:allowBackup="false"</code> en <code>AndroidManifest.xml</code>.</td>
+      <td>Previene respaldo no cifrado por ADB y protege la reapertura de sesión en el dispositivo.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>5. Control de Versiones y Pull Request</h2>
+<div class="callout">
+  <strong>Flujo Git implementado:</strong>
+  <ul>
+    <li><strong>Ramas activas:</strong> <code>main</code>, <code>develop</code>, <code>feature/login</code>, <code>feature/expenses-crud</code>, <code>feature/charts-notifications</code> y <code>hotfix/input-validation</code>.</li>
+    <li><strong>Pull Request documentado:</strong> Fusión de <code>feature/login</code> hacia <code>develop</code> con revisión técnica en <code>docs/PR_REVIEW_feature_login.md</code>.</li>
+    <li><strong>Hotfix en producción:</strong> Corrección en <code>hotfix/input-validation</code> desde <code>main</code> y fusionada en <code>main</code> y <code>develop</code>.</li>
+  </ul>
+</div>
+
+</body>
+</html>
